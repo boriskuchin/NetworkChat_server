@@ -1,0 +1,119 @@
+package handlers;
+
+import components.ChatServer;
+
+import javax.print.attribute.standard.NumberUp;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+
+public class ClientHandler {
+
+    private static final String AUTH_CMD_PREFIX = "/auth";
+    private static final String AUTHOK_CMD_PREFIX = "/authok";
+    private static final String AUTHERR_CMD_PREFIX = "/autherr";
+    private static final String CLIENT_MSG_CMD_PREFIX = "/cMsg";
+    private static final String SERVER_MSG_CMD_PREFIX = "/sMsg";
+    private static final String PRIVATE_MSG_CMD_PREFIX = "/pm";
+    private static final String STOP_SERVER_CMD_PREFIX = "/stop";
+    private static final String END_CLIENT_CMD_PREFIX = "/end";
+
+    Socket socket;
+    ChatServer server;
+    DataInputStream inputStream;
+    DataOutputStream outputStream;
+    private boolean isAuthenticated = false;
+    private String userName;
+
+    public ClientHandler(Socket socket, ChatServer server) {
+        this.socket = socket;
+        this.server = server;
+    }
+
+    public void handle() throws IOException {
+        inputStream = new DataInputStream(socket.getInputStream());
+        outputStream = new DataOutputStream(socket.getOutputStream());
+
+        new Thread(() -> {
+
+            try {
+                while (true) {
+                    String message = inputStream.readUTF();
+                    if (message.length() == 0) {
+                        continue;
+                    }
+                    if (!isAuthenticated) {
+                        if (!authenticateClient(message)) {
+                            continue;
+                        }
+
+                    } else if (message.trim().split("\\s+")[0].equals( STOP_SERVER_CMD_PREFIX)) {
+                        server.broadcastMessage("Остановка сервера");
+                        server.stop();
+                    } else if (message.trim().split("\\s+")[0].equals(CLIENT_MSG_CMD_PREFIX)) {
+                        server.broadcastMessage(message);
+
+                    } else {
+                        outputStream.writeUTF(message);
+                    }
+                }
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Ошибка чтения потока на хендлере " + this);
+            }
+        }).start();
+    }
+
+    private boolean authenticateClient(String message) throws IOException {
+        String[] messageSplit = message.trim().split("\\s+");
+        if (messageSplit.length != 3) {
+            outputStream.writeUTF(AUTHERR_CMD_PREFIX + " Неверный формат строки аутентификации");
+            return false;
+        }
+
+        if (!messageSplit[0].equals(AUTH_CMD_PREFIX)) {
+            outputStream.writeUTF(AUTHERR_CMD_PREFIX + " Неверная команда аутентификации");
+            return false;
+        }
+
+        String authenticatedName = server.checkCredentials(messageSplit[1], messageSplit[2]);
+        if (authenticatedName == null) {
+            outputStream.writeUTF(AUTHERR_CMD_PREFIX + " Некорректное имя пользователя и пароль");
+            return false;
+        }
+
+        if (server.isUserAlreadyLoggedIn(authenticatedName)) {
+            outputStream.writeUTF(AUTHERR_CMD_PREFIX + " Пользователь уже залогинен");
+            return false;
+        }
+
+        userName = authenticatedName;
+        outputStream.writeUTF(AUTHOK_CMD_PREFIX + "Добро пожаловать " + userName);
+        isAuthenticated = true;
+        return true;
+
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void sendMessageToClient(String message) throws IOException {
+        outputStream.writeUTF(message);
+    }
+
+    @Override
+    public String toString() {
+        return "ClientHandler{" +
+                "socket=" + socket +
+                ", server=" + server +
+                ", inputStream=" + inputStream +
+                ", outputStream=" + outputStream +
+                ", isAuthenticated=" + isAuthenticated +
+                ", userName='" + userName + '\'' +
+                '}';
+    }
+}
