@@ -55,23 +55,23 @@ public class ClientHandler {
                     } else {
                         switch (message.trim().split("\\s+")[0]) {
                             case STOP_SERVER_CMD_PREFIX:
-                                server.broadcastMessage("Остановка сервера");
+                                server.broadcastMessage("Остановка сервера", this);
                                 server.stop();
                                 break;
                             case CLIENT_MSG_CMD_PREFIX:
-                                server.broadcastMessage(message);
+                                server.broadcastMessage(userName + " пишет: " + message,this);
                                 break;
                             case SERVER_MSG_CMD_PREFIX:
                                 System.out.println("Сообщение для сервера " + message);
                                 break;
                             case END_CLIENT_CMD_PREFIX:
-                                server.broadcastMessage("Участник " + userName + " вышел из чата");
+                                server.broadcastMessage("Участник " + userName + " вышел из чата",this);
                                 server.unsubscribe(this);
                                 socket.close();
                                 break;
                             case PRIVATE_MSG_CMD_PREFIX:
                                 String recepient = message.trim().split("\\s+")[1];
-                                server.getHandlerByName(recepient).sendMessageToClient(message);
+                                server.getHandlerByName(recepient).sendMessageToClient(userName + " пишет: " + message);
                                 break;
                             default: outputStream.writeUTF("Сообщение самому себе" + message);
                         }

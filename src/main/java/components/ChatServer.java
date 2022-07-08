@@ -77,10 +77,10 @@ public class ChatServer {
 
     }
 
-    public void broadcastMessage(String message) throws IOException {
-        handlers.stream().forEach(handler -> {
+    public void broadcastMessage(String message, ClientHandler handler) throws IOException {
+        handlers.stream().filter(client -> client != handler).forEach(client -> {
             try {
-                handler.sendMessageToClient(message);
+                client.sendMessageToClient(message);
             } catch (IOException e) {
                 e.printStackTrace();
             }
