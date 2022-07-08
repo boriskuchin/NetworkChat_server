@@ -2,7 +2,6 @@ package handlers;
 
 import components.ChatServer;
 
-import javax.print.attribute.standard.NumberUp;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -31,9 +30,14 @@ public class ClientHandler {
         this.server = server;
     }
 
-    public void handle() throws IOException {
-        inputStream = new DataInputStream(socket.getInputStream());
-        outputStream = new DataOutputStream(socket.getOutputStream());
+    public void handle()  {
+        try {
+            inputStream = new DataInputStream(socket.getInputStream());
+            outputStream = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            System.out.println("ошибка чтения потоков");
+            e.printStackTrace();
+        }
 
         new Thread(() -> {
 
@@ -77,7 +81,9 @@ public class ClientHandler {
 
             } catch (IOException e) {
                 e.printStackTrace();
-                System.out.println("Ошибка чтения потока на хендлере " + this);
+                System.out.println("Ошибка чтения потока на хендлере " + this.socket);
+                server.unsubscribe(this);
+
             }
         }).start();
     }
