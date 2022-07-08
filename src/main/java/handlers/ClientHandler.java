@@ -48,14 +48,29 @@ public class ClientHandler {
                             continue;
                         }
 
-                    } else if (message.trim().split("\\s+")[0].equals( STOP_SERVER_CMD_PREFIX)) {
-                        server.broadcastMessage("Остановка сервера");
-                        server.stop();
-                    } else if (message.trim().split("\\s+")[0].equals(CLIENT_MSG_CMD_PREFIX)) {
-                        server.broadcastMessage(message);
-
                     } else {
-                        outputStream.writeUTF(message);
+                        switch (message.trim().split("\\s+")[0]) {
+                            case STOP_SERVER_CMD_PREFIX:
+                                server.broadcastMessage("Остановка сервера");
+                                server.stop();
+                                break;
+                            case CLIENT_MSG_CMD_PREFIX:
+                                server.broadcastMessage(message);
+                                break;
+                            case SERVER_MSG_CMD_PREFIX:
+                                System.out.println("Сообщение для сервера " + message);
+                                break;
+                            case END_CLIENT_CMD_PREFIX:
+                                server.broadcastMessage("Участник " + userName + " вышел из чата");
+                                server.unsubscribe(this);
+                                socket.close();
+                                break;
+                            case PRIVATE_MSG_CMD_PREFIX:
+                                String recepient = message.trim().split("\\s+")[1];
+                                server.getHandlerByName(recepient).sendMessageToClient(message);
+                                break;
+                            default: outputStream.writeUTF("Сообщение самому себе" + message);
+                        }
                     }
                 }
 
@@ -91,7 +106,7 @@ public class ClientHandler {
         }
 
         userName = authenticatedName;
-        outputStream.writeUTF(AUTHOK_CMD_PREFIX + "Добро пожаловать " + userName);
+        outputStream.writeUTF(AUTHOK_CMD_PREFIX + " Добро пожаловать " + userName);
         isAuthenticated = true;
         return true;
 

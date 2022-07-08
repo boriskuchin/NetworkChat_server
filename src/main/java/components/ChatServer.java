@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.logging.Handler;
 
 public class ChatServer {
 
@@ -74,9 +75,25 @@ public class ChatServer {
     }
 
     public void broadcastMessage(String message) throws IOException {
-        for (ClientHandler handler : handlers) {
-            handler.sendMessageToClient(message);
+        handlers.stream().forEach(handler -> {
+            try {
+                handler.sendMessageToClient(message);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
 
-        }
+//        for (ClientHandler handler : handlers) {
+//            handler.sendMessageToClient(message);
+//
+//        }
+    }
+
+    public void unsubscribe(ClientHandler clientHandler) {
+        handlers.remove(clientHandler);
+    }
+
+    public ClientHandler getHandlerByName(String name) {
+        return handlers.stream().filter(handler -> handler.getUserName().equals(name)).findAny().get();
     }
 }
