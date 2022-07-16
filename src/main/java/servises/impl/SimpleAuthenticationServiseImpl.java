@@ -8,10 +8,10 @@ import java.util.List;
 public class SimpleAuthenticationServiseImpl implements AuthenticationService {
     private static SimpleAuthenticationServiseImpl INSTANCE;
     private List<User> users = List.of(
-            new User("Борис", "Boris", "111"),
-            new User("Анна", "Anna", "222"),
-            new User("Дима", "Dima", "333"),
-            new User("Коля", "Kolya", "444")
+            new User("Борис", "Boris", "1"),
+            new User("Анна", "Anna", "1"),
+            new User("Дима", "Dima", "1"),
+            new User("Коля", "Kolya", "1")
     );
     private SimpleAuthenticationServiseImpl() {
     }

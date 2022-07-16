@@ -17,6 +17,7 @@ public class ClientHandler {
     private static final String PRIVATE_MSG_CMD_PREFIX = "/pm";
     private static final String STOP_SERVER_CMD_PREFIX = "/stop";
     private static final String END_CLIENT_CMD_PREFIX = "/end";
+    private static final String LIST_CLIENTS_CMD_PREFIX = "/usrs";
 
     Socket socket;
     ChatServer server;
@@ -82,7 +83,11 @@ public class ClientHandler {
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("Ошибка чтения потока на хендлере " + this.socket);
-                server.unsubscribe(this);
+                try {
+                    server.unsubscribe(this);
+                } catch (IOException ex) {
+                    e.printStackTrace();
+                }
 
             }
         }).start();
@@ -114,9 +119,13 @@ public class ClientHandler {
         userName = authenticatedName;
         outputStream.writeUTF(AUTHOK_CMD_PREFIX + " Добро пожаловать " + userName);
         isAuthenticated = true;
+        server.subscribe(this);
+
         return true;
 
     }
+
+
 
     public String getUserName() {
         return userName;
