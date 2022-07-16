@@ -40,12 +40,8 @@ public class ChatServer {
 
     private ClientHandler createNewHandler(Socket socket) {
         ClientHandler handler = new ClientHandler(socket, this);
-        subscribe(handler);
+//        subscribe(handler);
         return handler;
-    }
-
-    private synchronized void subscribe(ClientHandler handler) {
-        handlers.add(handler);
     }
 
     private Socket conectNewClient(ServerSocket serverSocket) throws IOException {
@@ -87,11 +83,40 @@ public class ChatServer {
         });
     }
 
-    public synchronized void unsubscribe(ClientHandler clientHandler) {
+    public void broadcastMessage(String message) throws IOException {
+        handlers.stream().forEach(client -> {
+            try {
+                client.sendMessageToClient(message);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+
+    public synchronized void subscribe(ClientHandler clientHandler) throws IOException {
+        broadcastMessage(String.format("%s %s вошел в чат",Prefixes.SERVER_MSG_CMD_PREFIX.getPrefix(), clientHandler.getUserName()));
+        handlers.add(clientHandler);
+        sendUserList();
+    }
+
+    public synchronized void unsubscribe(ClientHandler clientHandler) throws IOException {
+        broadcastMessage(String.format("%s %s покинул чат",Prefixes.SERVER_MSG_CMD_PREFIX.getPrefix(), clientHandler.getUserName()));
         handlers.remove(clientHandler);
+        sendUserList();
     }
 
     public ClientHandler getHandlerByName(String name) {
         return handlers.stream().filter(handler -> handler.getUserName().equals(name)).findAny().get();
     }
+
+    private void sendUserList() throws IOException {
+        String users = Prefixes.LIST_CLIENTS_CMD_PREFIX.getPrefix() + " ";
+        for (ClientHandler handler : handlers) {
+            users += handler.getUserName() + " ";
+        }
+        broadcastMessage(users);
+
+    }
+
 }
