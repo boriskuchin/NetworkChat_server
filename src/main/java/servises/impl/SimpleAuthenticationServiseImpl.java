@@ -9,14 +9,15 @@ import java.util.stream.Collectors;
 
 public class SimpleAuthenticationServiseImpl implements AuthenticationService {
     private static SimpleAuthenticationServiseImpl INSTANCE;
-    private List<User> users = new ArrayList<>();
+    private static List<User> users = new ArrayList<>();
 
-//            List.of(
-//            new User("Борис", "Boris", "1"),
-//            new User("Анна", "Anna", "1"),
-//            new User("Дима", "Dima", "1"),
-//            new User("Коля", "Kolya", "1")
-//    );
+    static {
+        users.add(new User("Борис", "Boris", "1"));
+        users.add(new User("Анна", "Anna", "1"));
+        users.add(new User("Дима", "Dima", "1"));
+        users.add(new User("Коля", "Kolya", "1"));
+    }
+
     private SimpleAuthenticationServiseImpl() {
     }
 
