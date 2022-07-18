@@ -7,11 +7,14 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 
 public class ClientHandler {
 
-
+    SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM d, ''yy HH:mm:ss", Locale.ROOT);
     Socket socket;
     ChatServer server;
     DataInputStream inputStream;
@@ -38,11 +41,13 @@ public class ClientHandler {
             try {
                 while (true) {
                     String message = inputStream.readUTF();
-                    System.out.println(message);
-
                     if (message.length() == 0) {
                         continue;
+                    } else if (Prefix.getPrefixFromText(message.trim().split("\\s+")[0]) == null) {
+                        continue;
                     } else {
+                        System.out.println(Prefix.getPrefixFromText(message.trim().split("\\s+")[0]));
+
                         switch (Prefix.getPrefixFromText(message.trim().split("\\s+")[0])) {
                             case AUTH_CMD_PREFIX:
                                 if (!authenticateClient(message)) {
@@ -50,14 +55,12 @@ public class ClientHandler {
                                 }
                                 break;
                             case STOP_SERVER_CMD_PREFIX:
-                                server.broadcastMessage("Остановка сервера", this);
+                                server.broadcastMessage(Prefix.SERVER_MSG_CMD_PREFIX.getPrefix() +  " Остановка сервера", this);
                                 server.stop();
                                 break;
                             case CLIENT_MSG_CMD_PREFIX:
-                                server.broadcastMessage(userName + " пишет: " + message, this);
-                                break;
-                            case SERVER_MSG_CMD_PREFIX:
-                                System.out.println("Сообщение для сервера " + message);
+
+                                server.broadcastMessage(String.format("%s%n%s пишет: %s", dateFormat.format(new Date()).toString(), userName, message.trim().split("\\s+", 2)[1]), this);
                                 break;
                             case END_CLIENT_CMD_PREFIX:
                                 server.broadcastMessage("Участник " + userName + " вышел из чата", this);
@@ -66,7 +69,10 @@ public class ClientHandler {
                                 break;
                             case PRIVATE_MSG_CMD_PREFIX:
                                 String recepient = message.trim().split("\\s+")[1];
-                                server.getHandlerByName(recepient).sendMessageToClient(userName + " пишет: " + message);
+                                ClientHandler receivingHandler = server.getHandlerByName(recepient);
+                                if (receivingHandler != this) {
+                                    receivingHandler.sendMessageToClient(String.format("%s%n[PM]%s пишет: %s", dateFormat.format(new Date()).toString(), userName, message.trim().split("\\s+", 3)[2]));
+                                }
                                 break;
                             case NEW_USR_CMD_PREFIX:
                                 String login = message.trim().split("\\s+")[1];
@@ -137,7 +143,8 @@ public class ClientHandler {
     }
 
     public void sendMessageToClient(String message) throws IOException {
-        outputStream.writeUTF(message);
+
+            outputStream.writeUTF(message);
     }
 
     @Override
