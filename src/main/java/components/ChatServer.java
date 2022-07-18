@@ -65,6 +65,16 @@ public class ChatServer {
         return false;
     }
 
+    public boolean isLoginAlreadyExist(String login) {
+
+        for (String log : authenticationService.getLogins()) {
+            if (log.equals(login)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void stop() {
         System.out.println("------------------------");
         System.out.println("-----Server stopped-----");
@@ -95,13 +105,13 @@ public class ChatServer {
 
 
     public synchronized void subscribe(ClientHandler clientHandler) throws IOException {
-        broadcastMessage(String.format("%s %s вошел в чат",Prefixes.SERVER_MSG_CMD_PREFIX.getPrefix(), clientHandler.getUserName()));
+        broadcastMessage(String.format("%s %s вошел в чат", Prefix.SERVER_MSG_CMD_PREFIX.getPrefix(), clientHandler.getUserName()));
         handlers.add(clientHandler);
         sendUserList();
     }
 
     public synchronized void unsubscribe(ClientHandler clientHandler) throws IOException {
-        broadcastMessage(String.format("%s %s покинул чат",Prefixes.SERVER_MSG_CMD_PREFIX.getPrefix(), clientHandler.getUserName()));
+        broadcastMessage(String.format("%s %s покинул чат", Prefix.SERVER_MSG_CMD_PREFIX.getPrefix(), clientHandler.getUserName()));
         handlers.remove(clientHandler);
         sendUserList();
     }
@@ -111,12 +121,16 @@ public class ChatServer {
     }
 
     private void sendUserList() throws IOException {
-        String users = Prefixes.LIST_CLIENTS_CMD_PREFIX.getPrefix() + " ";
+        String users = Prefix.LIST_CLIENTS_CMD_PREFIX.getPrefix() + " ";
         for (ClientHandler handler : handlers) {
             users += handler.getUserName() + " ";
         }
         broadcastMessage(users);
 
+    }
+
+    public void addNewUser(String name, String login, String pass) {
+        authenticationService.addUser(name, login, pass);
     }
 
 }

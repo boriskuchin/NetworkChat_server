@@ -3,16 +3,20 @@ package servises.impl;
 import models.User;
 import servises.AuthenticationService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SimpleAuthenticationServiseImpl implements AuthenticationService {
     private static SimpleAuthenticationServiseImpl INSTANCE;
-    private List<User> users = List.of(
-            new User("Борис", "Boris", "1"),
-            new User("Анна", "Anna", "1"),
-            new User("Дима", "Dima", "1"),
-            new User("Коля", "Kolya", "1")
-    );
+    private List<User> users = new ArrayList<>();
+
+//            List.of(
+//            new User("Борис", "Boris", "1"),
+//            new User("Анна", "Anna", "1"),
+//            new User("Дима", "Dima", "1"),
+//            new User("Коля", "Kolya", "1")
+//    );
     private SimpleAuthenticationServiseImpl() {
     }
 
@@ -31,6 +35,16 @@ public class SimpleAuthenticationServiseImpl implements AuthenticationService {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<String> getLogins() {
+        return users.stream().map(user -> user.getLogin()).collect(Collectors.toList());
+    }
+
+    @Override
+    public void addUser(String name, String login, String pass) {
+        users.add(new User(name, login, pass));
     }
 }
 
