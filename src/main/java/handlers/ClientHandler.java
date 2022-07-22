@@ -20,6 +20,7 @@ public class ClientHandler {
     DataInputStream inputStream;
     DataOutputStream outputStream;
 //    private boolean isAuthenticated = false;
+    private String userLogin;
     private String userName;
 
     public ClientHandler(Socket socket, ChatServer server) {
@@ -60,10 +61,10 @@ public class ClientHandler {
                                 break;
                             case CLIENT_MSG_CMD_PREFIX:
 
-                                server.broadcastMessage(String.format("%s%n%s пишет: %s", dateFormat.format(new Date()).toString(), userName, message.trim().split("\\s+", 2)[1]), this);
+                                server.broadcastMessage(String.format("%s%n%s пишет: %s", dateFormat.format(new Date()).toString(), userLogin, message.trim().split("\\s+", 2)[1]), this);
                                 break;
                             case END_CLIENT_CMD_PREFIX:
-                                server.broadcastMessage("Участник " + userName + " вышел из чата", this);
+                                server.broadcastMessage("Участник " + userLogin + " вышел из чата", this);
                                 server.unsubscribe(this);
                                 socket.close();
                                 break;
@@ -71,7 +72,7 @@ public class ClientHandler {
                                 String recepient = message.trim().split("\\s+")[1];
                                 ClientHandler receivingHandler = server.getHandlerByName(recepient);
                                 if (receivingHandler != this) {
-                                    receivingHandler.sendMessageToClient(String.format("%s%n[PM]%s пишет: %s", dateFormat.format(new Date()).toString(), userName, message.trim().split("\\s+", 3)[2]));
+                                    receivingHandler.sendMessageToClient(String.format("%s%n[PM]%s пишет: %s", dateFormat.format(new Date()).toString(), userLogin, message.trim().split("\\s+", 3)[2]));
                                 }
                                 break;
                             case NEW_USR_CMD_PREFIX:
@@ -84,6 +85,11 @@ public class ClientHandler {
                                 } else {
                                     outputStream.writeUTF(String.format("%s пользователь с таким логином уже существует", Prefix.NEW_USR_ERR_CMD_PREFIX.getPrefix()));
                                 }
+                                break;
+                            case CNG_NAME_CMD_PREFIX:
+                                String newName = message.trim().split("\\s+",2)[1];
+                                server.changeNameByLogin(userLogin, newName);
+                                server.broadcastMessage(String.format("%s Пользователь %s сменил имя с %s на %s", Prefix.SERVER_MSG_CMD_PREFIX.getPrefix(),userLogin,userName,newName), this);
                                 break;
                             default:
                                 outputStream.writeUTF("Сообщение самому себе" + message);
@@ -117,19 +123,20 @@ public class ClientHandler {
             return false;
         }
 
-        String authenticatedName = server.checkCredentials(messageSplit[1], messageSplit[2]);
-        if (authenticatedName == null) {
+        String authenticatedLogin = server.checkCredentials(messageSplit[1], messageSplit[2]);
+        if (authenticatedLogin == null) {
             outputStream.writeUTF(Prefix.AUTHERR_CMD_PREFIX.getPrefix() + " Некорректное имя пользователя и пароль");
             return false;
         }
 
-        if (server.isUserAlreadyLoggedIn(authenticatedName)) {
+        if (server.isUserAlreadyLoggedIn(authenticatedLogin)) {
             outputStream.writeUTF(Prefix.AUTHERR_CMD_PREFIX.getPrefix() + " Пользователь уже залогинен");
             return false;
         }
 
-        userName = authenticatedName;
-        outputStream.writeUTF(Prefix.AUTHOK_CMD_PREFIX.getPrefix() + " Добро пожаловать " + userName);
+        userLogin = authenticatedLogin;
+        userName = server.getNameByLogin(userLogin);
+        outputStream.writeUTF(Prefix.AUTHOK_CMD_PREFIX.getPrefix() + " " + userName);
         server.subscribe(this);
 
         return true;
@@ -138,9 +145,14 @@ public class ClientHandler {
 
 
 
+    public String getUserLogin() {
+        return userLogin;
+    }
+
     public String getUserName() {
         return userName;
     }
+
 
     public void sendMessageToClient(String message) throws IOException {
 
@@ -154,7 +166,7 @@ public class ClientHandler {
                 ", server=" + server +
                 ", inputStream=" + inputStream +
                 ", outputStream=" + outputStream +
-                ", userName='" + userName + '\'' +
+                ", userName='" + userLogin + '\'' +
                 '}';
     }
 }

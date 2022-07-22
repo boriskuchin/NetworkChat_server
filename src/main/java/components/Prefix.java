@@ -14,6 +14,8 @@ public enum Prefix {
     LIST_CLIENTS_CMD_PREFIX("/usrs"),
     NEW_USR_CMD_PREFIX("/new"),
     NEW_USR_OK_CMD_PREFIX("/newok"),
+    CNG_NAME_CMD_PREFIX("/changename"),
+
     NEW_USR_ERR_CMD_PREFIX("/newerr")
     ;
     private String prefix;

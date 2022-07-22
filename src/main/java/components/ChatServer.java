@@ -2,16 +2,29 @@ package components;
 
 import handlers.ClientHandler;
 import servises.AuthenticationService;
-import servises.impl.SimpleAuthenticationServiseImpl;
+import servises.impl.DataBaseAuthServiceImp;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class ChatServer {
 
-    private final AuthenticationService authenticationService = SimpleAuthenticationServiseImpl.getInstance();
+//    private final AuthenticationService authenticationService = SimpleAuthenticationServiseImpl.getInstance();
+    private final AuthenticationService authenticationService;
+
+    {
+        try {
+            authenticationService = DataBaseAuthServiceImp.getInstance();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private ArrayList<ClientHandler> handlers = new ArrayList<>();
 
     private int port;
@@ -58,7 +71,7 @@ public class ChatServer {
     public boolean isUserAlreadyLoggedIn(String userName) {
 
         for (ClientHandler handler : handlers) {
-            if (handler.getUserName() != null && handler.getUserName().equals(userName)) {
+            if (handler.getUserLogin() != null && handler.getUserLogin().equals(userName)) {
                 return true;
             }
         }
@@ -117,13 +130,13 @@ public class ChatServer {
     }
 
     public ClientHandler getHandlerByName(String name) {
-        return handlers.stream().filter(handler -> handler.getUserName().equals(name)).findAny().get();
+        return handlers.stream().filter(handler -> handler.getUserLogin().equals(name)).findAny().get();
     }
 
     private void sendUserList() throws IOException {
         String users = Prefix.LIST_CLIENTS_CMD_PREFIX.getPrefix() + " ";
         for (ClientHandler handler : handlers) {
-            users += handler.getUserName() + " ";
+            users += handler.getUserLogin() + " ";
         }
         broadcastMessage(users);
 
@@ -133,4 +146,11 @@ public class ChatServer {
         authenticationService.addUser(name, login, pass);
     }
 
+    public String getNameByLogin(String login) {
+        return authenticationService.getNameByLogin(login);
+    }
+
+    public void changeNameByLogin(String userLogin, String newName) {
+        authenticationService.changeNameByLogin(userLogin, newName);
+    }
 }
