@@ -11,12 +11,17 @@ public class SimpleAuthenticationServiseImpl implements AuthenticationService {
     private static SimpleAuthenticationServiseImpl INSTANCE;
     private static List<User> users = new ArrayList<>();
 
-    static {
-        users.add(new User("Борис", "Boris", "1"));
-        users.add(new User("Анна", "Anna", "1"));
-        users.add(new User("Дима", "Dima", "1"));
-        users.add(new User("Коля", "Kolya", "1"));
+    @Override
+    public void changeNameByLogin(String userLogin, String newName) {
+
     }
+
+//    static {
+//        users.add(new User("Борис", "Boris", "1"));
+//        users.add(new User("Анна", "Anna", "1"));
+//        users.add(new User("Дима", "Dima", "1"));
+//        users.add(new User("Коля", "Kolya", "1"));
+//    }
 
     private SimpleAuthenticationServiseImpl() {
     }
@@ -45,7 +50,11 @@ public class SimpleAuthenticationServiseImpl implements AuthenticationService {
 
     @Override
     public void addUser(String name, String login, String pass) {
-        users.add(new User(name, login, pass));
+        users.add(User.builder()
+                .name(name)
+                .login(login)
+                .password(pass)
+                .build());
     }
 
     @Override

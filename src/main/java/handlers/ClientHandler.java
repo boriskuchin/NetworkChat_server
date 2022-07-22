@@ -86,6 +86,11 @@ public class ClientHandler {
                                     outputStream.writeUTF(String.format("%s пользователь с таким логином уже существует", Prefix.NEW_USR_ERR_CMD_PREFIX.getPrefix()));
                                 }
                                 break;
+                            case CNG_NAME_CMD_PREFIX:
+                                String newName = message.trim().split("\\s+",2)[1];
+                                server.changeNameByLogin(userLogin, newName);
+                                server.broadcastMessage(String.format("%s Пользователь %s сменил имя с %s на %s", Prefix.SERVER_MSG_CMD_PREFIX.getPrefix(),userLogin,userName,newName), this);
+                                break;
                             default:
                                 outputStream.writeUTF("Сообщение самому себе" + message);
                         }
@@ -131,7 +136,7 @@ public class ClientHandler {
 
         userLogin = authenticatedLogin;
         userName = server.getNameByLogin(userLogin);
-        outputStream.writeUTF(Prefix.AUTHOK_CMD_PREFIX.getPrefix() + " Добро пожаловать " + userLogin);
+        outputStream.writeUTF(Prefix.AUTHOK_CMD_PREFIX.getPrefix() + " " + userName);
         server.subscribe(this);
 
         return true;

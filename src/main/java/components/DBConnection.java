@@ -2,16 +2,16 @@ package components;
 
 import lombok.Getter;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.*;
+import java.util.Properties;
 
 public class DBConnection {
 
-    private final String url = "jdbc:sqlite:/home/boris/geekbrains/NetworkChat_server/src/main/resources/users.db";
+    private final String url = "jdbc:sqlite:src/main/resources/db/users.db";
     @Getter
     private final Connection connection;
-
-
-
 
     public DBConnection() throws ClassNotFoundException, SQLException {
         Class.forName("org.sqlite.JDBC");

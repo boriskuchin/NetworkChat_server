@@ -12,4 +12,7 @@ public interface AuthenticationService {
     void addUser(String name, String login, String pass);
 
     String getNameByLogin(String login);
+
+    void changeNameByLogin(String userLogin, String newName);
+
 }

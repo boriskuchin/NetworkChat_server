@@ -149,4 +149,8 @@ public class ChatServer {
     public String getNameByLogin(String login) {
         return authenticationService.getNameByLogin(login);
     }
+
+    public void changeNameByLogin(String userLogin, String newName) {
+        authenticationService.changeNameByLogin(userLogin, newName);
+    }
 }

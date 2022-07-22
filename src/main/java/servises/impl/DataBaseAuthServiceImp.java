@@ -1,6 +1,7 @@
 package servises.impl;
 
 import components.DBConnection;
+import models.User;
 import servises.AuthenticationService;
 
 import java.sql.PreparedStatement;
@@ -14,6 +15,29 @@ public class DataBaseAuthServiceImp implements AuthenticationService {
     private static DataBaseAuthServiceImp INSTANCE;
 
     DBConnection dbConnection;
+
+    public DataBaseAuthServiceImp() throws SQLException, ClassNotFoundException {
+        dbConnection = new DBConnection();
+    }
+
+    public static synchronized DataBaseAuthServiceImp getInstance() throws SQLException, ClassNotFoundException {
+        if (INSTANCE == null) {
+            INSTANCE = new DataBaseAuthServiceImp();
+        }
+        return INSTANCE;
+    }
+
+    @Override
+    public void changeNameByLogin(String userLogin, String newName) {
+        String query = "UPDATE users SET name = '%s' WHERE login = '%s';";
+        try {
+            PreparedStatement stmt = dbConnection.getConnection().prepareStatement(String.format(query, newName, userLogin));
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 
     @Override
     public String getNameByLogin(String login) {
@@ -32,29 +56,19 @@ public class DataBaseAuthServiceImp implements AuthenticationService {
         return result;
     }
 
-    public DataBaseAuthServiceImp() throws SQLException, ClassNotFoundException {
-        dbConnection = new DBConnection();
-    }
-
-    public static synchronized DataBaseAuthServiceImp getInstance() throws SQLException, ClassNotFoundException {
-        if (INSTANCE == null) {
-            INSTANCE = new DataBaseAuthServiceImp();
-        }
-        return INSTANCE;
-    }
-
 
     @Override
     public String geNameByLoginAndPassword(String login, String password) {
+
         String result = null;
-
         try {
-            ResultSet resultSet = getUsers();
+            String query = "SELECT * FROM users WHERE login = '%s' AND password = '%s';";
+            PreparedStatement stmt = dbConnection.getConnection().prepareStatement(String.format( query,login,password));
+            ResultSet resultSet = stmt.executeQuery();
 
-            while (resultSet.next()) {
-                if (resultSet.getString("login").equals(login) && resultSet.getString("password").equals(password)) {
-                    return resultSet.getString("login");
-                }
+
+            if (resultSet.next()) {
+                return resultSet.getString("login");
             }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -65,16 +79,10 @@ public class DataBaseAuthServiceImp implements AuthenticationService {
     @Override
     public List<String> getLogins() {
         ArrayList<String> result = new ArrayList<>();
-
-        ResultSet set = null;
-        try {
-            set = getUsers();
-            while (set.next()) {
-                result.add(set.getString("login"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        for (User user : getAllUsers()) {
+            result.add(user.getLogin());
         }
+
         return result;
     }
 
@@ -97,10 +105,25 @@ public class DataBaseAuthServiceImp implements AuthenticationService {
         }
     }
 
-    public ResultSet getUsers() throws SQLException {
-        String query = "SELECT * FROM users";
-        PreparedStatement stmt = dbConnection.getConnection().prepareStatement(query);
-        return stmt.executeQuery();
+    public List<User> getAllUsers()  {
+        ArrayList<User> users = new ArrayList<>();
+
+        try {
+            String query = "SELECT * FROM users";
+            PreparedStatement stmt = dbConnection.getConnection().prepareStatement(query);
+            ResultSet resultSet = stmt.executeQuery();
+
+            while (resultSet.next()) {
+                users.add(User.builder()
+                        .login(resultSet.getString("login"))
+                        .password(resultSet.getString("password"))
+                        .name(resultSet.getString("name"))
+                        .build());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return users;
     }
 
 
