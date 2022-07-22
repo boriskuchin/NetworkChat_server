@@ -47,5 +47,10 @@ public class SimpleAuthenticationServiseImpl implements AuthenticationService {
     public void addUser(String name, String login, String pass) {
         users.add(new User(name, login, pass));
     }
+
+    @Override
+    public String getNameByLogin(String login) {
+        return null;
+    }
 }
 
