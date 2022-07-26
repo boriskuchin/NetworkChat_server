@@ -118,13 +118,15 @@ public class ChatServer {
 
 
     public synchronized void subscribe(ClientHandler clientHandler) throws IOException {
-        broadcastMessage(String.format("%s %s вошел в чат", Prefix.SERVER_MSG_CMD_PREFIX.getPrefix(), clientHandler.getUserName()));
+        broadcastMessage(String.format("%s вошел в чат",  clientHandler.getUserName()).toUpperCase());
         handlers.add(clientHandler);
         sendUserList();
     }
 
     public synchronized void unsubscribe(ClientHandler clientHandler) throws IOException {
-        broadcastMessage(String.format("%s %s покинул чат", Prefix.SERVER_MSG_CMD_PREFIX.getPrefix(), clientHandler.getUserName()));
+        if (clientHandler.getUserName() != null) {
+            broadcastMessage(String.format("%s покинул чат",  clientHandler.getUserName()).toUpperCase());
+        }
         handlers.remove(clientHandler);
         sendUserList();
     }
