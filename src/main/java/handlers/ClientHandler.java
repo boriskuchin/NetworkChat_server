@@ -56,7 +56,7 @@ public class ClientHandler {
                                 }
                                 break;
                             case STOP_SERVER_CMD_PREFIX:
-                                server.broadcastMessage(Prefix.SERVER_MSG_CMD_PREFIX.getPrefix() +  " Остановка сервера", this);
+                                server.broadcastMessage("ВНИМАНИЕ! ОСТАНОВКА СЕРВЕРА", this);
                                 server.stop();
                                 break;
                             case CLIENT_MSG_CMD_PREFIX:
@@ -89,7 +89,7 @@ public class ClientHandler {
                             case CNG_NAME_CMD_PREFIX:
                                 String newName = message.trim().split("\\s+",2)[1];
                                 server.changeNameByLogin(userLogin, newName);
-                                server.broadcastMessage(String.format("%s Пользователь %s сменил имя с %s на %s", Prefix.SERVER_MSG_CMD_PREFIX.getPrefix(),userLogin,userName,newName), this);
+                                server.broadcastMessage(String.format("Пользователь %s сменил имя с %s на %s", userLogin,userName,newName), this);
                                 break;
                             default:
                                 outputStream.writeUTF("Сообщение самому себе" + message);
