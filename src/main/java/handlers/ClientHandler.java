@@ -2,6 +2,8 @@ package handlers;
 
 import components.ChatServer;
 import components.Prefix;
+import components.ProjectLogger;
+import org.apache.log4j.Logger;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -14,6 +16,8 @@ import java.util.Locale;
 
 public class ClientHandler {
 
+    private final Logger systemLogger;
+    private final Logger messageLogger;
     SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM d, ''yy HH:mm:ss", Locale.ROOT);
     Socket socket;
     ChatServer server;
@@ -26,6 +30,8 @@ public class ClientHandler {
     public ClientHandler(Socket socket, ChatServer server) {
         this.socket = socket;
         this.server = server;
+        this.systemLogger = ProjectLogger.getInstance().getSystemLogger();
+        this.messageLogger = ProjectLogger.getInstance().getMessageLogger();
     }
 
     public void handle()  {
@@ -33,8 +39,8 @@ public class ClientHandler {
             inputStream = new DataInputStream(socket.getInputStream());
             outputStream = new DataOutputStream(socket.getOutputStream());
         } catch (IOException e) {
-            System.out.println("ошибка чтения потоков");
-            e.printStackTrace();
+            systemLogger.warn("ошибка чтения потоков");
+            systemLogger.warn(ProjectLogger.stackTraceToString(e));
         }
 
         new Thread(() -> {
@@ -42,12 +48,14 @@ public class ClientHandler {
             try {
                 while (true) {
                     String message = inputStream.readUTF();
+
+
                     if (message.length() == 0) {
                         continue;
                     } else if (Prefix.getPrefixFromText(message.trim().split("\\s+")[0]) == null) {
                         continue;
                     } else {
-                        System.out.println(Prefix.getPrefixFromText(message.trim().split("\\s+")[0]));
+//                        systemLogger.debug(Prefix.getPrefixFromText(message.trim().split("\\s+")[0]));
 
                         switch (Prefix.getPrefixFromText(message.trim().split("\\s+")[0])) {
                             case AUTH_CMD_PREFIX:
@@ -62,6 +70,7 @@ public class ClientHandler {
                             case CLIENT_MSG_CMD_PREFIX:
 
                                 server.broadcastMessage(String.format("%s%n%s пишет: %s", dateFormat.format(new Date()).toString(), userLogin, message.trim().split("\\s+", 2)[1]), this);
+                                messageLogger.info(String.format("%s%n%s пишет: %s", dateFormat.format(new Date()).toString(), userLogin, message.trim().split("\\s+", 2)[1]));
                                 break;
                             case END_CLIENT_CMD_PREFIX:
                                 server.broadcastMessage("Участник " + userLogin + " вышел из чата", this);
@@ -74,22 +83,29 @@ public class ClientHandler {
                                 if (receivingHandler != this) {
                                     receivingHandler.sendMessageToClient(String.format("%s%n[PM]%s пишет: %s", dateFormat.format(new Date()).toString(), userLogin, message.trim().split("\\s+", 3)[2]));
                                 }
+                                messageLogger.info(String.format("%s%n[PM]%s пишет: %s", dateFormat.format(new Date()).toString(), userLogin, message.trim().split("\\s+", 3)[2]));
                                 break;
                             case NEW_USR_CMD_PREFIX:
                                 String login = message.trim().split("\\s+")[1];
                                 String name = message.trim().split("\\s+")[2];
                                 String pass = message.trim().split("\\s+")[3];
+                                systemLogger.info("Добавление нового пользователя");
+
                                 if (!server.isLoginAlreadyExist(login)) {
                                     server.addNewUser(name, login, pass);
                                     outputStream.writeUTF(String.format("%s Пользователь добавлен", Prefix.NEW_USR_OK_CMD_PREFIX.getPrefix()));
+                                    systemLogger.info(String.format("%s Пользователь %s добавлен", Prefix.NEW_USR_OK_CMD_PREFIX.getPrefix(), login));
                                 } else {
                                     outputStream.writeUTF(String.format("%s пользователь с таким логином уже существует", Prefix.NEW_USR_ERR_CMD_PREFIX.getPrefix()));
+                                    systemLogger.info(String.format("%s пользователь с логином %s уже существует", Prefix.NEW_USR_ERR_CMD_PREFIX.getPrefix(), login));
+
                                 }
                                 break;
                             case CNG_NAME_CMD_PREFIX:
                                 String newName = message.trim().split("\\s+",2)[1];
                                 server.changeNameByLogin(userLogin, newName);
                                 server.broadcastMessage(String.format("Пользователь %s сменил имя с %s на %s", userLogin,userName,newName), this);
+                                systemLogger.info(String.format("Пользователь %s сменил имя с %s на %s", userLogin,userName,newName));
                                 break;
                             default:
                                 outputStream.writeUTF("Сообщение самому себе" + message);
@@ -99,12 +115,13 @@ public class ClientHandler {
 
 
             } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("Ошибка чтения потока на хендлере " + this.socket);
+                systemLogger.warn(ProjectLogger.stackTraceToString(e));
+                systemLogger.warn("Ошибка чтения потока на хендлере " + this.socket);
                 try {
                     server.unsubscribe(this);
                 } catch (IOException ex) {
-                    e.printStackTrace();
+                    systemLogger.warn(ProjectLogger.stackTraceToString(ex));
+
                 }
 
             }

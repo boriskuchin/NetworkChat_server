@@ -1,44 +1,36 @@
 package components;
 
 import handlers.ClientHandler;
+import org.apache.log4j.Logger;
 import servises.AuthenticationService;
 import servises.impl.DataBaseAuthServiceImp;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class ChatServer {
 
-//    private final AuthenticationService authenticationService = SimpleAuthenticationServiseImpl.getInstance();
-    private final AuthenticationService authenticationService;
-
-    {
-        try {
-            authenticationService = DataBaseAuthServiceImp.getInstance();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private final AuthenticationService authenticationService = DataBaseAuthServiceImp.getInstance();
 
     private ArrayList<ClientHandler> handlers = new ArrayList<>();
 
     private int port;
 
+    Logger systemLogger;
 
     public ChatServer(int port) {
         this.port = port;
+        this.systemLogger = ProjectLogger.getInstance().getSystemLogger();
+
     }
 
     public void start() throws IOException {
         ServerSocket serverSocket = new ServerSocket(port);
-        System.out.println("------------------------");
-        System.out.println("-----Server started-----");
-        System.out.println("------------------------");
+        systemLogger.info("------------------------");
+        systemLogger.info("-----Server started-----");
+        systemLogger.info("------------------------");
 
         while (true) {
             waitForNewClient(serverSocket);
@@ -53,14 +45,13 @@ public class ChatServer {
 
     private ClientHandler createNewHandler(Socket socket) {
         ClientHandler handler = new ClientHandler(socket, this);
-//        subscribe(handler);
         return handler;
     }
 
     private Socket conectNewClient(ServerSocket serverSocket) throws IOException {
-        System.out.println("Ожидаем нового подключения");
+        systemLogger.info("Ожидаем нового подключения");
         Socket socket = serverSocket.accept();
-        System.out.println("Клиент подключился!");
+        systemLogger.info("Клиент подключился!");
         return socket;
     }
 
@@ -89,9 +80,9 @@ public class ChatServer {
     }
 
     public void stop() {
-        System.out.println("------------------------");
-        System.out.println("-----Server stopped-----");
-        System.out.println("------------------------");
+        systemLogger.info("------------------------");
+        systemLogger.info("-----Server stopped-----");
+        systemLogger.info("------------------------");
         System.exit(0);
 
     }
@@ -101,7 +92,7 @@ public class ChatServer {
             try {
                 client.sendMessageToClient(message);
             } catch (IOException e) {
-                e.printStackTrace();
+                systemLogger.error(ProjectLogger.stackTraceToString(e));
             }
         });
     }
@@ -111,7 +102,7 @@ public class ChatServer {
             try {
                 client.sendMessageToClient(message);
             } catch (IOException e) {
-                e.printStackTrace();
+                systemLogger.error(ProjectLogger.stackTraceToString(e));
             }
         });
     }

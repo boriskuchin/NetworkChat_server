@@ -1,0 +1,52 @@
+2022-08-22 17:47:26 INFO   ChatServer:systemLogger:31 - ------------------------
+2022-08-22 17:47:26 INFO   ChatServer:systemLogger:32 - -----Server started-----
+2022-08-22 17:47:26 INFO   ChatServer:systemLogger:33 - ------------------------
+2022-08-22 17:47:26 INFO   ChatServer:systemLogger:52 - Ожидаем нового подключения
+2022-08-22 17:47:32 INFO   ChatServer:systemLogger:54 - Клиент подключился!
+2022-08-22 17:47:32 INFO   ChatServer:systemLogger:52 - Ожидаем нового подключения
+2022-08-22 17:47:42 DEBUG  ClientHandler:systemLogger:54 - NEW_USR_CMD_PREFIX
+2022-08-22 17:47:42 DEBUG  DataBaseAuthServiceImp:systemLogger:125 - getAllUsers SELECT * FROM users 
+ parameters=null
+2022-08-22 17:47:42 DEBUG  DataBaseAuthServiceImp:systemLogger:125 - getAllUsers SELECT * FROM users 
+ parameters=null
+2022-08-22 17:47:42 DEBUG  DataBaseAuthServiceImp:systemLogger:111 - addUser INSERT INTO users(id,login,password,name) VALUES(?,?,?,?) 
+ parameters=[8, Boriska, 1, Boriska]
+2022-08-22 17:47:49 DEBUG  ClientHandler:systemLogger:54 - AUTH_CMD_PREFIX
+2022-08-22 17:47:49 DEBUG  DataBaseAuthServiceImp:systemLogger:76 - geNameByLoginAndPassword SELECT * FROM users WHERE login = 'Boriska' AND password = '1'; 
+ parameters=null
+2022-08-22 17:47:49 DEBUG  DataBaseAuthServiceImp:systemLogger:56 - getNameByLogin SELECT * FROM users WHERE login = 'Boriska' 
+ parameters=null
+2022-08-22 18:19:22 INFO   ChatServer:systemLogger:31 - ------------------------
+2022-08-22 18:19:22 INFO   ChatServer:systemLogger:32 - -----Server started-----
+2022-08-22 18:19:22 INFO   ChatServer:systemLogger:33 - ------------------------
+2022-08-22 18:19:22 INFO   ChatServer:systemLogger:52 - Ожидаем нового подключения
+2022-08-22 18:19:32 INFO   ChatServer:systemLogger:54 - Клиент подключился!
+2022-08-22 18:19:32 INFO   ChatServer:systemLogger:52 - Ожидаем нового подключения
+2022-08-22 18:19:41 INFO   ClientHandler:systemLogger:86 - Добавление нового пользователя
+2022-08-22 18:19:41 DEBUG  DataBaseAuthServiceImp:systemLogger:125 - getAllUsers SELECT * FROM users 
+ parameters=null
+2022-08-22 18:19:41 DEBUG  DataBaseAuthServiceImp:systemLogger:125 - getAllUsers SELECT * FROM users 
+ parameters=null
+2022-08-22 18:19:41 DEBUG  DataBaseAuthServiceImp:systemLogger:111 - addUser INSERT INTO users(id,login,password,name) VALUES(?,?,?,?) 
+ parameters=[9, Sergey, 1, Sergey]
+2022-08-22 18:19:41 INFO   ClientHandler:systemLogger:91 - /newok Пользователь Sergey добавлен
+2022-08-22 18:19:46 DEBUG  DataBaseAuthServiceImp:systemLogger:76 - geNameByLoginAndPassword SELECT * FROM users WHERE login = 'Sergey' AND password = '1'; 
+ parameters=null
+2022-08-22 18:19:46 DEBUG  DataBaseAuthServiceImp:systemLogger:56 - getNameByLogin SELECT * FROM users WHERE login = 'Sergey' 
+ parameters=null
+2022-08-22 18:22:19 INFO   ChatServer:systemLogger:31 - ------------------------
+2022-08-22 18:22:19 INFO   ChatServer:systemLogger:32 - -----Server started-----
+2022-08-22 18:22:19 INFO   ChatServer:systemLogger:33 - ------------------------
+2022-08-22 18:22:19 INFO   ChatServer:systemLogger:52 - Ожидаем нового подключения
+2022-08-22 18:22:25 INFO   ChatServer:systemLogger:54 - Клиент подключился!
+2022-08-22 18:22:25 INFO   ChatServer:systemLogger:52 - Ожидаем нового подключения
+2022-08-22 18:22:29 DEBUG  DataBaseAuthServiceImp:systemLogger:76 - geNameByLoginAndPassword SELECT * FROM users WHERE login = 'Boris' AND password = '1'; 
+ parameters=null
+2022-08-22 18:22:29 DEBUG  DataBaseAuthServiceImp:systemLogger:56 - getNameByLogin SELECT * FROM users WHERE login = 'Boris' 
+ parameters=null
+2022-08-22 18:22:34 INFO   ChatServer:systemLogger:54 - Клиент подключился!
+2022-08-22 18:22:34 INFO   ChatServer:systemLogger:52 - Ожидаем нового подключения
+2022-08-22 18:22:39 DEBUG  DataBaseAuthServiceImp:systemLogger:76 - geNameByLoginAndPassword SELECT * FROM users WHERE login = 'Sergey' AND password = '1'; 
+ parameters=null
+2022-08-22 18:22:39 DEBUG  DataBaseAuthServiceImp:systemLogger:56 - getNameByLogin SELECT * FROM users WHERE login = 'Sergey' 
+ parameters=null

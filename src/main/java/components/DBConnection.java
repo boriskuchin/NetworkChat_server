@@ -1,6 +1,7 @@
 package components;
 
 import lombok.Getter;
+import org.apache.log4j.Logger;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,11 +12,18 @@ public class DBConnection {
 
     private final String url = "jdbc:sqlite:src/main/resources/db/users.db";
     @Getter
-    private final Connection connection;
+    private Connection connection;
+    private Logger systemLogger;
 
-    public DBConnection() throws ClassNotFoundException, SQLException {
-        Class.forName("org.sqlite.JDBC");
-        this.connection = DriverManager.getConnection(url);
+    public DBConnection()  {
+        this.systemLogger = ProjectLogger.getInstance().getSystemLogger();
+
+        try {
+            Class.forName("org.sqlite.JDBC");
+            this.connection = DriverManager.getConnection(url);
+        } catch (ClassNotFoundException | SQLException e) {
+            systemLogger.error(ProjectLogger.stackTraceToString(e));
+        }
     }
 
 
