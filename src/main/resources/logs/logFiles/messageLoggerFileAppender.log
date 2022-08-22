@@ -1,0 +1,9 @@
+2022-08-22 18:22:29 INFO   ClientHandler:messageLogger:51 - /auth Boris 1
+2022-08-22 18:22:39 INFO   ClientHandler:messageLogger:51 - /auth Sergey 1
+2022-08-22 18:23:14 INFO   ClientHandler:messageLogger:51 - /cMsg ПРивет
+2022-08-22 18:23:21 INFO   ClientHandler:messageLogger:51 - /cMsg Привет Привет
+
+2022-08-22 21:50:15 INFO   ClientHandler:messageLogger:73 - Mon, Aug 22, '22 21:50:15
+Boris пишет: тест логгер
+2022-08-22 21:50:29 INFO   ClientHandler:messageLogger:86 - Mon, Aug 22, '22 21:50:29
+[PM]Sergey пишет: Тест ПМ логгер

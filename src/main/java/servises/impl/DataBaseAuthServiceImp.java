@@ -1,7 +1,9 @@
 package servises.impl;
 
 import components.DBConnection;
+import components.ProjectLogger;
 import models.User;
+import org.apache.log4j.Logger;
 import servises.AuthenticationService;
 
 import java.sql.PreparedStatement;
@@ -13,14 +15,16 @@ import java.util.List;
 public class DataBaseAuthServiceImp implements AuthenticationService {
 
     private static DataBaseAuthServiceImp INSTANCE;
+    private final Logger systemLogger;
 
     DBConnection dbConnection;
 
-    public DataBaseAuthServiceImp() throws SQLException, ClassNotFoundException {
+    private DataBaseAuthServiceImp()  {
         dbConnection = new DBConnection();
+        this.systemLogger = ProjectLogger.getInstance().getSystemLogger();
     }
 
-    public static synchronized DataBaseAuthServiceImp getInstance() throws SQLException, ClassNotFoundException {
+    public static synchronized DataBaseAuthServiceImp getInstance()  {
         if (INSTANCE == null) {
             INSTANCE = new DataBaseAuthServiceImp();
         }
@@ -33,8 +37,10 @@ public class DataBaseAuthServiceImp implements AuthenticationService {
         try {
             PreparedStatement stmt = dbConnection.getConnection().prepareStatement(String.format(query, newName, userLogin));
             stmt.executeUpdate();
+            systemLogger.debug("ChangeNameByLogin " + stmt.toString());
+
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            systemLogger.error(ProjectLogger.stackTraceToString(e));
         }
 
     }
@@ -47,11 +53,13 @@ public class DataBaseAuthServiceImp implements AuthenticationService {
         try {
             stmt = dbConnection.getConnection().prepareStatement(String.format(query, login));
             ResultSet resultSet = stmt.executeQuery();
+            systemLogger.debug("getNameByLogin " + stmt.toString());
+
             while (resultSet.next()) {
                 result = resultSet.getString("name");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            systemLogger.error(ProjectLogger.stackTraceToString(e));
         }
         return result;
     }
@@ -65,13 +73,14 @@ public class DataBaseAuthServiceImp implements AuthenticationService {
             String query = "SELECT * FROM users WHERE login = '%s' AND password = '%s';";
             PreparedStatement stmt = dbConnection.getConnection().prepareStatement(String.format( query,login,password));
             ResultSet resultSet = stmt.executeQuery();
+            systemLogger.debug("geNameByLoginAndPassword " + stmt.toString());
 
 
             if (resultSet.next()) {
                 return resultSet.getString("login");
             }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                systemLogger.error(ProjectLogger.stackTraceToString(e));
             }
         return result;
     }
@@ -99,9 +108,10 @@ public class DataBaseAuthServiceImp implements AuthenticationService {
             stmt.setString(3, pass);
             stmt.setString(4, name);
             stmt.executeUpdate();
+            systemLogger.debug("addUser " + stmt.toString());
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            systemLogger.error(ProjectLogger.stackTraceToString(e));
         }
     }
 
@@ -112,6 +122,7 @@ public class DataBaseAuthServiceImp implements AuthenticationService {
             String query = "SELECT * FROM users";
             PreparedStatement stmt = dbConnection.getConnection().prepareStatement(query);
             ResultSet resultSet = stmt.executeQuery();
+            systemLogger.debug("getAllUsers " + stmt.toString());
 
             while (resultSet.next()) {
                 users.add(User.builder()
@@ -121,7 +132,7 @@ public class DataBaseAuthServiceImp implements AuthenticationService {
                         .build());
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            systemLogger.error(ProjectLogger.stackTraceToString(e));
         }
         return users;
     }

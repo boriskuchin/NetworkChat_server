@@ -1,8 +1,12 @@
+import components.ProjectLogger;
+import org.apache.log4j.Logger;
+
 import java.io.*;
 import java.net.Socket;
 
 public class ListenerThread extends Thread {
 
+    private final Logger systemLogger;
     private Socket socket;
     private DataOutputStream outputStream;
     private DataInputStream inputStream;
@@ -10,13 +14,14 @@ public class ListenerThread extends Thread {
     public ListenerThread(Socket socket) {
         super();
         this.socket = socket;
+        this.systemLogger = ProjectLogger.getInstance().getSystemLogger();
         try {
             outputStream = new DataOutputStream(socket.getOutputStream());
             inputStream = new DataInputStream(socket.getInputStream());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            systemLogger.error(ProjectLogger.stackTraceToString(e));
         }
-        System.out.println("Подключение установлено. Socket: " + socket);
+        systemLogger.info("Подключение установлено. Socket: " + socket);
 
     }
 
@@ -26,19 +31,19 @@ public class ListenerThread extends Thread {
             try {
                 while (true) {
                     String message = inputStream.readUTF();
-                    System.out.println(message);
+                    systemLogger.debug(message);
                     outputStream.writeUTF("Эхо-ответ сервера: \n" + message);
                     outputStream.flush();
                 }
             } catch (IOException e) {
-                System.out.println("Соединение разорвано клиентом");
-                e.printStackTrace();
+                systemLogger.info("Соединение разорвано клиентом");
+                systemLogger.info(ProjectLogger.stackTraceToString(e));
 
             } finally {
                 try {
                     socket.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    systemLogger.error(ProjectLogger.stackTraceToString(ex));
                 }
             }
         });
@@ -56,8 +61,8 @@ public class ListenerThread extends Thread {
 
 
             } catch (IOException e) {
-                System.out.println("Соединение потеряно");
-                e.printStackTrace();
+                systemLogger.error("Соединение потеряно");
+                systemLogger.error(ProjectLogger.stackTraceToString(e));
             }
             }
         });
